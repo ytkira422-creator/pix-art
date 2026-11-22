@@ -1,0 +1,301 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  user-select: none;
+}
+
+body {
+  background-color: #1f1f1f;
+  color: #f3f3f3;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* الشريط العلوي السريع */
+.top-bar {
+  background: #202020;
+  height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2d2d2d;
+}
+
+.top-left, .top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-logo {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-left: 6px;
+}
+
+.icon-btn, .mini-btn {
+  background: transparent;
+  color: #e5e7eb;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 0.9rem;
+}
+
+.mini-btn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-color: #3a3a3a;
+  background: #2b2b2b;
+}
+
+.icon-btn:hover, .mini-btn:hover {
+  background: #333333;
+}
+
+.mini-btn.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+/* شريط الأدوات */
+.ribbon {
+  background: #272727;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #363636;
+}
+
+.ribbon-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.group-items {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.group-label {
+  font-size: 0.72rem;
+  color: #a1a1aa;
+}
+
+.divider {
+  width: 1px;
+  height: 52px;
+  background: #3b3b3b;
+}
+
+.tool-btn {
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.tool-btn:hover {
+  background: #363636;
+}
+
+.tool-btn.active {
+  background: #383838;
+  border-color: #60a5fa;
+  box-shadow: inset 0 0 0 1px #60a5fa;
+}
+
+/* لوحة الألوان */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 18px);
+  gap: 5px;
+}
+
+.swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: transform 0.12s;
+}
+
+.swatch:hover {
+  transform: scale(1.15);
+}
+
+.swatch.active {
+  outline: 2px solid #60a5fa;
+  outline-offset: 1px;
+}
+
+input[type="color"] {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.floating-show-btn {
+  position: fixed;
+  top: 46px;
+  left: 12px;
+  z-index: 30;
+  background: #2b2b2b;
+  color: #ffffff;
+  border: 1px solid #454545;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* جسم المحرر */
+.editor-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* أشرطة التحكم الجانبية */
+.side-sliders {
+  width: 48px;
+  background: #232323;
+  border-left: 1px solid #323232;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 4px;
+}
+
+.slider-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.slider-icon {
+  font-size: 0.9rem;
+}
+
+.slider-num {
+  font-size: 0.7rem;
+  color: #cbd5e1;
+}
+
+.vertical-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 18px;
+  height: 120px;
+  cursor: pointer;
+  accent-color: #38bdf8;
+}
+
+/* منطقة المساطر واللوحة */
+.ruler-area {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  grid-template-rows: 22px 1fr;
+  background: #2c2c2c;
+  overflow: hidden;
+}
+
+.ruler-corner {
+  background: #252525;
+  border-left: 1px solid #3a3a3a;
+  border-bottom: 1px solid #3a3a3a;
+  font-size: 0.65rem;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.h-ruler {
+  width: 100%;
+  height: 22px;
+  background: #252525;
+  border-bottom: 1px solid #3a3a3a;
+  display: block;
+}
+
+.v-ruler {
+  width: 22px;
+  height: 100%;
+  background: #252525;
+  border-left: 1px solid #3a3a3a;
+  display: block;
+}
+
+.workspace {
+  background: #2e2e2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  padding: 20px;
+}
+
+.canvas-wrapper {
+  position: relative;
+  background: #ffffff;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  border: 1px solid #4b5563;
+}
+
+#canvas {
+  display: block;
+  cursor: crosshair;
+}
+
+#gridCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  display: none;
+}
+
+/* شريط الحالة السفلي */
+.status-bar {
+  background: #202020;
+  height: 28px;
+  padding: 0 14px;
+  border-top: 1px solid #2d2d2d;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 0.78rem;
+  color: #d1d5db;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

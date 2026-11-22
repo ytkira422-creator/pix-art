@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pix Art</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo.png" />
+</head>
+<body>
+  <!-- شريط العنوان السريع -->
+  <div class="top-bar">
+    <div class="top-left">
+      <span class="app-logo">🎨 Pix Art</span>
+      <button id="undoBtn" class="icon-btn" title="تراجع (Ctrl+Z)">↩</button>
+      <button id="clearBtn" class="icon-btn" title="مسح اللوحة">🗑</button>
+      <button id="saveBtn" class="icon-btn" title="حفظ كصورة PNG">💾</button>
+      <button id="gridBtn" class="mini-btn" title="إظهار/إخفاء الشبكة">الشبكة</button>
+    </div>
+    <div class="top-right">
+      <button id="focusBtn" class="mini-btn">إخفاء الشريط</button>
+    </div>
+  </div>
+
+  <!-- شريط الأدوات الرئيسي -->
+  <header class="ribbon" id="toolbar">
+    <div class="ribbon-group">
+      <div class="group-items">
+        <button class="tool-btn active" data-brush="pen" title="قلم عادي">✏️</button>
+        <button class="tool-btn" data-brush="fill" title="تعبئة لون">🪣</button>
+        <button class="tool-btn" data-brush="eraser" title="ممحاة">🧽</button>
+        <button class="tool-btn" data-brush="pixel" title="فرشاة بيكسل">🟪</button>
+        <button class="tool-btn" data-brush="marker" title="فرشاة ناعمة">🖌️</button>
+        <button class="tool-btn" data-brush="spray" title="بخاخ">💨</button>
+      </div>
+      <span class="group-label">أدوات الرسم</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ribbon-group">
+      <div class="palette-grid">
+        <span class="swatch active" data-color="#000000" style="background:#000000;"></span>
+        <span class="swatch" data-color="#ffffff" style="background:#ffffff;"></span>
+        <span class="swatch" data-color="#7f7f7f" style="background:#7f7f7f;"></span>
+        <span class="swatch" data-color="#c3c3c3" style="background:#c3c3c3;"></span>
+        <span class="swatch" data-color="#880015" style="background:#880015;"></span>
+        <span class="swatch" data-color="#ed1c24" style="background:#ed1c24;"></span>
+        <span class="swatch" data-color="#ff7f27" style="background:#ff7f27;"></span>
+        <span class="swatch" data-color="#fff200" style="background:#fff200;"></span>
+        <span class="swatch" data-color="#22b14c" style="background:#22b14c;"></span>
+        <span class="swatch" data-color="#00a2e8" style="background:#00a2e8;"></span>
+        <span class="swatch" data-color="#3f48cc" style="background:#3f48cc;"></span>
+        <span class="swatch" data-color="#a349a4" style="background:#a349a4;"></span>
+      </div>
+      <input type="color" id="colorPicker" value="#000000" title="لون مخصص" />
+      <span class="group-label">الألوان</span>
+    </div>
+  </header>
+
+  <button id="showToolbarBtn" class="floating-show-btn" style="display: none;">🎨 إظهار الأدوات</button>
+
+  <!-- منطقة العمل مع المساطر وأشرطة السحب الجانبية -->
+  <div class="editor-body">
+    <!-- أشرطة التحكم الجانبية (السمك والشفافية) -->
+    <aside class="side-sliders">
+      <div class="slider-card" title="حجم الفرشاة">
+        <span class="slider-icon">〰</span>
+        <input type="range" id="sizePicker" class="vertical-slider" min="2" max="50" value="10" />
+        <span id="sizeValue" class="slider-num">10</span>
+      </div>
+
+      <div class="slider-card" title="الشفافية">
+        <span class="slider-icon">💧</span>
+        <input type="range" id="alphaPicker" class="vertical-slider" min="10" max="100" value="100" />
+        <span id="alphaValue" class="slider-num">100%</span>
+      </div>
+    </aside>
+
+    <!-- حاوية المساطر واللوحة -->
+    <div class="ruler-area">
+      <div class="ruler-corner">px</div>
+      <canvas id="hRuler" class="h-ruler"></canvas>
+      <canvas id="vRuler" class="v-ruler"></canvas>
+
+      <main class="workspace" id="workspace">
+        <div class="canvas-wrapper">
+          <canvas id="canvas"></canvas>
+          <canvas id="gridCanvas"></canvas>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- شريط الحالة السفلي -->
+  <footer class="status-bar">
+    <div class="status-item">
+      <span>📍</span>
+      <span id="coordsText">0, 0 px</span>
+    </div>
+    <div class="status-item">
+      <span>📐</span>
+      <span id="canvasSizeText">900 × 520 px</span>
+    </div>
+    <div class="status-item">
+      <span>🔍</span>
+      <span id="zoomText">100%</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
