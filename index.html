@@ -11,6 +11,9 @@
   <!-- شريط العنوان السريع -->
   <div class="top-bar">
     <div class="top-left">
+      <button id="uploadImgBtn" class="mini-btn" title="إدراج صورة من الجهاز">🖼 صورة</button>
+      <input type="file" id="imageInput" accept="image/*" hidden />
+      <button id="redoBtn" class="icon-btn" title="إعادة (Ctrl+Y)">↪</button>
       <span class="app-logo">🎨 Pix Art</span>
       <button id="undoBtn" class="icon-btn" title="تراجع (Ctrl+Z)">↩</button>
       <button id="clearBtn" class="icon-btn" title="مسح اللوحة">🗑</button>
@@ -26,12 +29,17 @@
   <header class="ribbon" id="toolbar">
     <div class="ribbon-group">
       <div class="group-items">
+        <button class="tool-btn" data-brush="eyedropper" title="قطارة الألوان">💉</button>
+        <button class="tool-btn" data-brush="text" title="إضافة نص">🔤</button>
         <button class="tool-btn active" data-brush="pen" title="قلم عادي">✏️</button>
         <button class="tool-btn" data-brush="fill" title="تعبئة لون">🪣</button>
         <button class="tool-btn" data-brush="eraser" title="ممحاة">🧽</button>
         <button class="tool-btn" data-brush="pixel" title="فرشاة بيكسل">🟪</button>
         <button class="tool-btn" data-brush="marker" title="فرشاة ناعمة">🖌️</button>
         <button class="tool-btn" data-brush="spray" title="بخاخ">💨</button>
+        <button class="tool-btn" data-brush="line" title="خط مستقيم">📏</button>
+        <button class="tool-btn" data-brush="rect" title="مستطيل">▭</button>
+        <button class="tool-btn" data-brush="circle" title="دائرة">◯</button>
       </div>
       <span class="group-label">أدوات الرسم</span>
     </div>

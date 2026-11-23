@@ -21,8 +21,12 @@ const alphaValue = document.getElementById("alphaValue");
 
 const gridBtn = document.getElementById("gridBtn");
 const undoBtn = document.getElementById("undoBtn");
+const redoBtn = document.getElementById("redoBtn");
 const clearBtn = document.getElementById("clearBtn");
 const saveBtn = document.getElementById("saveBtn");
+
+const uploadImgBtn = document.getElementById("uploadImgBtn");
+const imageInput = document.getElementById("imageInput");
 
 const toolButtons = document.querySelectorAll(".tool-btn");
 const swatches = document.querySelectorAll(".swatch");
@@ -37,15 +41,25 @@ let currentColor = colorPicker.value;
 let brushSize = Number(sizePicker.value);
 let brushAlpha = Number(alphaPicker.value) / 100;
 
+let startX = 0;
+let startY = 0;
+let snapshotBeforeShape = null;
+
+// سجل التراجع والإعادة
 let history = [];
+let redoStack = [];
 const maxHistory = 25;
 
-function saveState() {
-  if (history.length >= maxHistory) history.shift();
-  history.push(canvas.toDataURL());
+function isShapeTool(brush) {
+  return brush === "line" || brush === "rect" || brush === "circle";
 }
 
-// رسم المساطر العلوية والجانبية
+function saveState(clearRedo = true) {
+  if (history.length >= maxHistory) history.shift();
+  history.push(canvas.toDataURL());
+  if (clearRedo) redoStack = [];
+}
+
 function drawRulers() {
   hRuler.width = hRuler.clientWidth;
   hRuler.height = hRuler.clientHeight;
@@ -104,7 +118,8 @@ function setupCanvas() {
   ctx.fillRect(0, 0, width, height);
 
   history = [];
-  saveState();
+  redoStack = [];
+  saveState(false);
   drawGridLines();
   drawRulers();
 }
@@ -133,6 +148,59 @@ function drawGridLines() {
 
 setupCanvas();
 window.addEventListener("resize", drawRulers);
+
+// إرفاق صورة من الجهاز ورسمها متناسبة داخل اللوحة
+uploadImgBtn.addEventListener("click", () => {
+  imageInput.click();
+});
+
+imageInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = canvas.width - 40;
+      const maxH = canvas.height - 40;
+      const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      const offsetX = (canvas.width - drawW) / 2;
+      const offsetY = (canvas.height - drawH) / 2;
+
+      ctx.save();
+      ctx.globalAlpha = brushAlpha;
+      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+      ctx.restore();
+      saveState();
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+  imageInput.value = "";
+});
+
+// أداة القطارة لالتقاط اللون من اللوحة
+function pickColorAt(x, y) {
+  const px = Math.floor(x);
+  const py = Math.floor(y);
+  if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) return;
+
+  const pixel = ctx.getImageData(px, py, 1, 1).data;
+  const hex =
+    "#" +
+    [pixel[0], pixel[1], pixel[2]]
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("");
+
+  currentColor = hex;
+  colorPicker.value = hex;
+  swatches.forEach((s) => {
+    s.classList.toggle("active", s.dataset.color.toLowerCase() === hex.toLowerCase());
+  });
+}
 
 function hexToRgb(hex) {
   const clean = hex.replace("#", "");
@@ -211,6 +279,31 @@ function floodFill(startX, startY, fillHex) {
   ctx.putImageData(imageData, 0, 0);
 }
 
+function drawShape(x1, y1, x2, y2) {
+  ctx.save();
+  ctx.globalAlpha = brushAlpha;
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = brushSize;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  ctx.beginPath();
+  if (currentBrush === "line") {
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+  } else if (currentBrush === "rect") {
+    ctx.rect(x1, y1, x2 - x1, y2 - y1);
+  } else if (currentBrush === "circle") {
+    const radiusX = Math.abs(x2 - x1) / 2;
+    const radiusY = Math.abs(y2 - y1) / 2;
+    const centerX = x1 + (x2 - x1) / 2;
+    const centerY = y1 + (y2 - y1) / 2;
+    ctx.ellipse(centerX, centerY, Math.max(1, radiusX), Math.max(1, radiusY), 0, 0, Math.PI * 2);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
 focusBtn.addEventListener("click", () => {
   toolbar.style.display = "none";
   showToolbarBtn.style.display = "block";
@@ -285,6 +378,26 @@ function drawSpray(x, y) {
 }
 
 canvas.addEventListener("mousedown", (e) => {
+  if (currentBrush === "eyedropper") {
+    pickColorAt(e.offsetX, e.offsetY);
+    return;
+  }
+
+  if (currentBrush === "text") {
+    const text = prompt("اكتب النص الذي تريد إضافته:");
+    if (text && text.trim() !== "") {
+      ctx.save();
+      ctx.globalAlpha = brushAlpha;
+      ctx.fillStyle = currentColor;
+      const fontSize = Math.max(14, brushSize * 2);
+      ctx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
+      ctx.fillText(text, e.offsetX, e.offsetY);
+      ctx.restore();
+      saveState();
+    }
+    return;
+  }
+
   if (currentBrush === "fill") {
     ctx.globalAlpha = 1;
     floodFill(e.offsetX, e.offsetY, currentColor);
@@ -293,6 +406,14 @@ canvas.addEventListener("mousedown", (e) => {
   }
 
   isDrawing = true;
+  startX = e.offsetX;
+  startY = e.offsetY;
+
+  if (isShapeTool(currentBrush)) {
+    snapshotBeforeShape = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
   if (currentBrush === "pixel") {
     drawPixel(e.offsetX, e.offsetY);
   } else if (currentBrush === "spray") {
@@ -306,7 +427,17 @@ canvas.addEventListener("mousedown", (e) => {
 canvas.addEventListener("mousemove", (e) => {
   coordsText.textContent = `${Math.round(e.offsetX)}, ${Math.round(e.offsetY)} px`;
 
-  if (!isDrawing || currentBrush === "fill") return;
+  if (!isDrawing || currentBrush === "fill" || currentBrush === "eyedropper" || currentBrush === "text") {
+    return;
+  }
+
+  if (isShapeTool(currentBrush)) {
+    if (snapshotBeforeShape) {
+      ctx.putImageData(snapshotBeforeShape, 0, 0);
+    }
+    drawShape(startX, startY, e.offsetX, e.offsetY);
+    return;
+  }
 
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
@@ -339,18 +470,16 @@ canvas.addEventListener("mousemove", (e) => {
 window.addEventListener("mouseup", () => {
   if (!isDrawing) return;
   isDrawing = false;
-  if (currentBrush !== "pixel" && currentBrush !== "spray") {
+  snapshotBeforeShape = null;
+  if (!isShapeTool(currentBrush) && currentBrush !== "pixel" && currentBrush !== "spray") {
     ctx.closePath();
   }
   saveState();
 });
 
-function undo() {
-  if (history.length <= 1) return;
-  history.pop();
-  const previousState = history[history.length - 1];
+function applyHistorySnapshot(dataUrl) {
   const img = new Image();
-  img.src = previousState;
+  img.src = dataUrl;
   img.onload = () => {
     ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -358,12 +487,33 @@ function undo() {
   };
 }
 
+function undo() {
+  if (history.length <= 1) return;
+  const popped = history.pop();
+  redoStack.push(popped);
+  applyHistorySnapshot(history[history.length - 1]);
+}
+
+function redo() {
+  if (redoStack.length === 0) return;
+  const nextState = redoStack.pop();
+  history.push(nextState);
+  applyHistorySnapshot(nextState);
+}
+
 undoBtn.addEventListener("click", undo);
+redoBtn.addEventListener("click", redo);
 
 window.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
     e.preventDefault();
     undo();
+  } else if (
+    ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") ||
+    ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "z")
+  ) {
+    e.preventDefault();
+    redo();
   }
 });
 
